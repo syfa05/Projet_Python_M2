@@ -1,5 +1,5 @@
 import requests
-
+"""
 url = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/records?limit=100&refine=date_heure%3A%222024%2F01%2F01%22"
 response = requests.get(url)
 
@@ -35,7 +35,7 @@ else:
 data_filtrer = [record for record in data_filter if all(value is not None for value in record.values())]
 
 print(data_filtrer)
-
+"""
 class DataFetcher:
     def __init__(self, url):
         self.url = url
