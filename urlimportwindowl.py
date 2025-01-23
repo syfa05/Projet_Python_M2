@@ -7,7 +7,9 @@ import os
 import scipy
 from datetime import datetime
 
+import scipy.integrate
 from scipy.interpolate import CubicSpline
+import scipy.interpolate
 
 
 class DataFetcher:
@@ -111,10 +113,9 @@ def interpolate_and_plot(data, key, title, degree):
     sorted_time_vector = np.array(time_vector)[sorted_indices]
     sorted_values = np.array(values)[sorted_indices]
 
-    # Polynomial interpolation
-    coefficients = np.polyfit(sorted_time_vector, sorted_values, degree)
-    polynomial = np.poly1d(coefficients)
-    interpolated_values_poly = polynomial(sorted_time_vector)
+    # Lagrange interpolation
+    #polynomial = lagrange(sorted_time_vector, sorted_values)
+    #interpolated_values_poly = polynomial(sorted_time_vector)
 
     # Cubic spline interpolation
     cs = CubicSpline(sorted_time_vector, sorted_values)
@@ -122,7 +123,7 @@ def interpolate_and_plot(data, key, title, degree):
 
     plt.figure(figsize=(10, 5))
     plt.plot(sorted_time_vector, sorted_values, 'o', label='Original Data')
-    plt.plot(sorted_time_vector, interpolated_values_poly, '-', label=f'Polynomial Degree {degree}')
+    #plt.plot(sorted_time_vector, interpolated_values_poly, '-', label=f'Polynomial Degree {degree}')
     plt.plot(sorted_time_vector, interpolated_values_spline, '--', label='Cubic Spline')
     plt.title(title)
     plt.xlabel('Time (seconds since epoch)')
@@ -133,7 +134,7 @@ def interpolate_and_plot(data, key, title, degree):
 
 
                 
-url = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/records?limit=100&refine=date_heure%3A%222024%2F01%2F01%22"
+url = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/records?limit=100&refine=date_heure%3A%222024%22"
 fetcher = DataFetcher(url)
 data_filtrer = fetcher.get_filtered_data()
 Conso_Max, Conso_Min = fetcher.max_min_consommation_brute_totale()
