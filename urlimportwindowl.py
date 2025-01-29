@@ -1,13 +1,9 @@
 import requests
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import json
-import os
-import scipy
 from datetime import datetime
 
-import scipy.integrate
+import json
 from scipy.interpolate import CubicSpline
 import scipy.interpolate
 
@@ -19,32 +15,40 @@ class DataFetcher:
     def fetch_data(self):
         response = requests.get(self.url)
         if response.status_code == 200:
-            return response.json()
+            data = response.json()
+            return data
         else:
             print(f"Failed to retrieve data: {response.status_code}")
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as http_err:
+                print(f"HTTP error occurred: {http_err}")
+            except requests.exceptions.RequestException as req_err:
+                print(f"Request error occurred: {req_err}")
+            except json.decoder.JSONDecodeError as json_err:
+                print(f"JSON decode error: {json_err}")
             return None
-
+    
     def filter_data(self, data):
         data_filter = []
-        if 'results' in data:
-            for record in data['results']:
-                date = record.get('date')
-                heure = record.get('heure')
-                consommation_brute_gaz_grtgaz = record.get('consommation_brute_gaz_grtgaz')
-                consommation_brute_gaz_terega = record.get('consommation_brute_gaz_terega')
-                consommation_brute_gaz_totale = record.get('consommation_brute_gaz_totale')
-                consommation_brute_electricite_rte = record.get('consommation_brute_electricite_rte')
-                consommation_brute_totale = record.get('consommation_brute_totale')
-                data_filter.append({
-                    'date': date,
-                    'heure': heure,
-                    'consommation_brute_gaz_grtgaz': consommation_brute_gaz_grtgaz,
-                    'consommation_brute_gaz_terega': consommation_brute_gaz_terega,
-                    'consommation_brute_gaz_totale': consommation_brute_gaz_totale,
-                    'consommation_brute_electricite_rte': consommation_brute_electricite_rte,
-                    'consommation_brute_totale': consommation_brute_totale
-                })
-        else:
+        for record in data['results']:
+            date = record.get('date')
+            heure = record.get('heure')
+            consommation_brute_gaz_grtgaz = record.get('consommation_brute_gaz_grtgaz')
+            consommation_brute_gaz_terega = record.get('consommation_brute_gaz_terega')
+            consommation_brute_gaz_totale = record.get('consommation_brute_gaz_totale')
+            consommation_brute_electricite_rte = record.get('consommation_brute_electricite_rte')
+            consommation_brute_totale = record.get('consommation_brute_totale')
+            data_filter.append({
+                'date': date,
+                'heure': heure,
+                'consommation_brute_gaz_grtgaz': consommation_brute_gaz_grtgaz,
+                'consommation_brute_gaz_terega': consommation_brute_gaz_terega,
+                'consommation_brute_gaz_totale': consommation_brute_gaz_totale,
+                'consommation_brute_electricite_rte': consommation_brute_electricite_rte,
+                'consommation_brute_totale': consommation_brute_totale
+            })
+        if not data_filter:
             print("No results found in the data.")
         return [record for record in data_filter if all(value is not None for value in record.values())]
 
@@ -139,7 +143,18 @@ def interpolate_and_plot(data, key, title, degree):
 
 
                 
-url = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/records?limit=100&refine=date_heure%3A%222024%22"
+
+def generate_url(start_date, end_date):
+    base_url = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/exports/csv"
+    formatted_start_date = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
+    formatted_end_date = datetime.strptime(end_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
+    query = f"(date_heure%3A%5B{formatted_start_date}%20TO%20{formatted_end_date}%5D)"
+    return f"{base_url}?lang=fr&refine=date_heure%3A%222023%22&qv1={query}&timezone=Europe%2FParis&use_labels=true&delimiter=%3B"
+
+start_date = "2023-12-01"
+end_date = "2024-01-31"
+
+url = generate_url(start_date, end_date)
 fetcher = DataFetcher(url)
 data_filtrer = fetcher.get_filtered_data()
 Conso_Max, Conso_Min = fetcher.max_min_consommation_brute_totale()
