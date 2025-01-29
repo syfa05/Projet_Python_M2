@@ -15,15 +15,18 @@ class ExcelDataHandler:
         self.end_date = end_date
 
     def generate_url(self):
-        base_url = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/exports/csv"
+        base_url = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/exports/xlsx?lang=fr&refine=date_heure%3A%222023%22&qv1=(date_heure%3A%5B2023-12-01T23%3A00%3A00Z%20TO%202024-01-31T22%3A59%3A59Z%5D)&timezone=Europe%2FParis&use_labels=true"
         formatted_start_date = datetime.strptime(self.start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
         formatted_end_date = datetime.strptime(self.end_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
         query = f"(date_heure%3A%5B{formatted_start_date}%20TO%20{formatted_end_date}%5D)"
-        return f"{base_url}?lang=fr&refine=date_heure%3A%222023%22&qv1={query}&timezone=Europe%2FParis&use_labels=true&delimiter=%3B"
+        return f"{base_url}&qv1={query}&delimiter=%3B"
 
     def save_url_to_excel(self, output_file):
         # Lire les données à partir de l'URL
-        data = pd.read_csv(self.generate_url())
+        response = requests.get(self.generate_url())
+        with open('output.xlsx', 'wb') as f:
+            f.write(response.content)
+        data = pd.read_excel('output.xlsx')
 
         # Enregistrer les données dans un fichier Excel
         data.to_excel(output_file, index=False)
@@ -75,7 +78,6 @@ else:
     # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
     excel_handler.save_url_to_excel(output_file)
 
-# Lire les données à partir du fichier Excel
-imported_data = pd.read_excel(output_file)
+
    
 
