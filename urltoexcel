@@ -44,7 +44,14 @@ class FileHandler:
         return file_path
 
     @staticmethod
-    def import_and_save_excel_file(file_path, output_file='output.xlsx'):
+    def import_and_save_excel_file(output_file='output.xlsx'):
+        # Demander à l'utilisateur de sélectionner un fichier
+        file_path = FileHandler.select_file()
+
+        if not file_path:
+            print("Aucun fichier sélectionné")
+            return None
+        
         # Lire les données à partir du fichier Excel
         data = pd.read_excel(file_path)
         print(f"Les données ont été importées à partir de '{file_path}'")
@@ -56,14 +63,12 @@ class FileHandler:
         return data
 
 
-
-# Demander à l'utilisateur de sélectionner un fichier
-file_path = FileHandler.select_file()
-
-if file_path:
-    imported_data = FileHandler.import_and_save_excel_file(file_path)
+"""
+imported_data = FileHandler.import_and_save_excel_file()
+if imported_data is not None:
+    print("Données importées avec succès")
 else:
-    print("Aucun fichier sélectionné")
+    print("Aucune donnée importée")
 
     # Définir les dates de début et de fin
     start_date = "2023-12-01"
@@ -78,6 +83,59 @@ else:
     # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
     excel_handler.save_url_to_excel(output_file)
 
+"""
+def plot_histograms_from_excel():
+    # Lire les données à partir du fichier Excel
+    data = pd.read_excel('output.xlsx')
 
-   
+    # Colonnes d'intérêt
+    columns_of_interest = [
+        'Consommation brute gaz (MW PCS 0°C) - GRTgaz',
+        'Consommation brute gaz (MW PCS 0°C) - Teréga',
+        'Consommation brute gaz totale (MW PCS 0°C)',
+        'Consommation brute électricité (MW) - RTE',
+        'Consommation brute totale (MW)'
+    ]
+
+    # Calculer les statistiques
+    max_values = data[columns_of_interest].max()
+    min_values = data[columns_of_interest].min()
+    mean_values = data[columns_of_interest].mean()
+
+    # Créer les sous-graphiques
+    fig, axes = plt.subplots(3, 1, figsize=(10, 15))
+
+    # Définir le fond avec des carrés
+    plt.style.use('ggplot')
+
+    # Histogramme des valeurs maximales
+    axes[0].bar(columns_of_interest, max_values, color='blue')
+    axes[0].set_title('Valeurs Maximales')
+    axes[0].set_ylabel('Consommation (MW)')
+    axes[0].set_xlabel('Type de Consommation')
+
+    # Histogramme des valeurs minimales
+    axes[1].bar(columns_of_interest, min_values, color='red')
+    axes[1].set_title('Valeurs Minimales')
+    axes[1].set_ylabel('Consommation (MW)')
+    axes[1].set_xlabel('Type de Consommation')
+
+    # Histogramme des valeurs moyennes
+    axes[2].bar(columns_of_interest, mean_values, color='green')
+    axes[2].set_title('Valeurs Moyennes')
+    axes[2].set_ylabel('Consommation (MW)')
+    axes[2].set_xlabel('Type de Consommation')
+
+    # Ajouter des labels aux axes x et les faire pivoter pour une meilleure lisibilité
+    #for ax in axes:
+       # ax.set_xticklabels(columns_of_interest, rotation=45, ha='right')
+
+    # Ajuster l'espacement entre les sous-graphiques
+    plt.tight_layout()
+    plt.tight_layout()
+    plt.tight_layout()
+    plt.show()
+
+# Appeler la fonction pour tracer les histogrammes
+plot_histograms_from_excel()
 
