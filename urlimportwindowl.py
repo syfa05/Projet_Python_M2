@@ -65,6 +65,11 @@ class DataFetcher:
          Consomation_Min = []*len(Keys)
          for key in Keys:
                 data_filtrer = self.get_filtered_data()
+                if not data_filtrer:
+                    print(f"No data available for key: {key}")
+                    Consomation_Max.append(None)
+                    Consomation_Min.append(None)
+                    continue
                 Valeur_Max = max(data_filtrer, key=lambda x: x[key])
                 Consomation_Max.append(Valeur_Max[key])
                 Valeur_Min = min(data_filtrer, key=lambda x: x[key])
