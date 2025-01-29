@@ -73,7 +73,7 @@ else:
 output_file = 'output.xlsx'
 
 # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
-excel_handler.save_url_to_excel(output_file)
+#excel_handler.save_url_to_excel(output_file)
 
 # Lire les données à partir du fichier Excel
 imported_data = pd.read_excel(output_file)
