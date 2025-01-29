@@ -62,18 +62,18 @@ if file_path:
 else:
     print("Aucun fichier sélectionné")
 
-# Définir les dates de début et de fin
-#start_date = "2023-12-01"
-#end_date = "2024-01-31"
+    # Définir les dates de début et de fin
+    start_date = "2023-12-01"
+    end_date = "2024-01-31"
 
-# Créer une instance de ExcelDataHandler
-#excel_handler = ExcelDataHandler(start_date, end_date)
+    # Créer une instance de ExcelDataHandler
+    excel_handler = ExcelDataHandler(start_date, end_date)
 
-# Nom du fichier de sortie
-output_file = 'output.xlsx'
+    # Nom du fichier de sortie
+    output_file = 'output.xlsx'
 
-# Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
-#excel_handler.save_url_to_excel(output_file)
+    # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
+    excel_handler.save_url_to_excel(output_file)
 
 # Lire les données à partir du fichier Excel
 imported_data = pd.read_excel(output_file)
