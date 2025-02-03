@@ -2,8 +2,10 @@ import pandas as pd
 import tkinter as tk
 import requests
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import numpy as np
 import scipy.interpolate as spi
+from plotly.subplots import make_subplots
 import json
 from datetime import datetime
 from scipy.interpolate import CubicSpline
@@ -15,11 +17,11 @@ class ExcelDataHandler:
         self.end_date = end_date
 
     def generate_url(self):
-        base_url = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/exports/xlsx?lang=fr&refine=date_heure%3A%222023%22&qv1=(date_heure%3A%5B2023-12-01T23%3A00%3A00Z%20TO%202024-01-31T22%3A59%3A59Z%5D)&timezone=Europe%2FParis&use_labels=true"
+        base_url = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/exports/xlsx?lang=fr"
         formatted_start_date = datetime.strptime(self.start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
         formatted_end_date = datetime.strptime(self.end_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
         query = f"(date_heure%3A%5B{formatted_start_date}%20TO%20{formatted_end_date}%5D)"
-        return f"{base_url}&qv1={query}&delimiter=%3B"
+        return f"{base_url}&qv1={query}&timezone=Europe%2FParis&use_labels=true&delimiter=%3B"
 
     def save_url_to_excel(self, output_file):
         # Lire les données à partir de l'URL
@@ -62,8 +64,7 @@ class FileHandler:
         
         return data
 
-
-"""
+# Importer les données à partir d'un fichier Excel
 imported_data = FileHandler.import_and_save_excel_file()
 if imported_data is not None:
     print("Données importées avec succès")
@@ -71,7 +72,7 @@ else:
     print("Aucune donnée importée")
 
     # Définir les dates de début et de fin
-    start_date = "2023-12-01"
+    start_date = "2022-12-01"
     end_date = "2024-01-31"
 
     # Créer une instance de ExcelDataHandler
@@ -83,7 +84,7 @@ else:
     # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
     excel_handler.save_url_to_excel(output_file)
 
-"""
+
 def plot_histograms_from_excel():
     # Lire les données à partir du fichier Excel
     data = pd.read_excel('output.xlsx')
@@ -102,39 +103,39 @@ def plot_histograms_from_excel():
     min_values = data[columns_of_interest].min()
     mean_values = data[columns_of_interest].mean()
 
-    # Créer les sous-graphiques
-    fig, axes = plt.subplots(3, 1, figsize=(10, 15))
+    # Extraire la plage de temps
+    start_time = data['Date'].iloc[0]
+    end_time = data['Date'].iloc[-1]
+    time_range = f"Plage de temps: {start_time} à {end_time}"
 
-    # Définir le fond avec des carrés
-    plt.style.use('ggplot')
+    columns_of_interest_abr = [
+        'GRTgaz',
+        'Teréga',
+        'Total Gaz',
+        'RTE',
+        'Total'
+    ]
+
+    
+
+    # Créer les sous-graphiques
+    fig = make_subplots(rows=3, cols=1, subplot_titles=('Valeurs Maximales', 'Valeurs Minimales', 'Valeurs Moyennes'))
 
     # Histogramme des valeurs maximales
-    axes[0].bar(columns_of_interest, max_values, color='blue')
-    axes[0].set_title('Valeurs Maximales')
-    axes[0].set_ylabel('Consommation (MW)')
-    axes[0].set_xlabel('Type de Consommation')
+    fig.add_trace(go.Bar(x=columns_of_interest_abr, y=max_values, marker_color='blue', name='Valeurs Maximales'), row=1, col=1)
 
     # Histogramme des valeurs minimales
-    axes[1].bar(columns_of_interest, min_values, color='red')
-    axes[1].set_title('Valeurs Minimales')
-    axes[1].set_ylabel('Consommation (MW)')
-    axes[1].set_xlabel('Type de Consommation')
+    fig.add_trace(go.Bar(x=columns_of_interest_abr, y=min_values, marker_color='red', name='Valeurs Minimales'), row=2, col=1)
 
     # Histogramme des valeurs moyennes
-    axes[2].bar(columns_of_interest, mean_values, color='green')
-    axes[2].set_title('Valeurs Moyennes')
-    axes[2].set_ylabel('Consommation (MW)')
-    axes[2].set_xlabel('Type de Consommation')
+    fig.add_trace(go.Bar(x=columns_of_interest_abr, y=mean_values, marker_color='green', name='Valeurs Moyennes'), row=3, col=1)
 
-    # Ajouter des labels aux axes x et les faire pivoter pour une meilleure lisibilité
-    #for ax in axes:
-       # ax.set_xticklabels(columns_of_interest, rotation=45, ha='right')
+    # Mettre à jour la mise en page
+    fig.update_layout(template="plotly_white", height=800, width=800, title_text=f"Consommation de Gaz et d'Électricité du {end_time} au {start_time} ")
+    fig.update_yaxes(title_text="Consommation (MW)", range=[0, 40000])
 
-    # Ajuster l'espacement entre les sous-graphiques
-    plt.tight_layout()
-    plt.tight_layout()
-    plt.tight_layout()
-    plt.show()
+    # Afficher le graphique
+    fig.show()
 
 # Appeler la fonction pour tracer les histogrammes
 plot_histograms_from_excel()
