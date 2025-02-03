@@ -73,7 +73,7 @@ else:
 
     # Définir les dates de début et de fin
     start_date = "2022-12-01"
-    end_date = "2024-01-31"
+    end_date = "2023-01-31"
 
     # Créer une instance de ExcelDataHandler
     excel_handler = ExcelDataHandler(start_date, end_date)
@@ -84,59 +84,85 @@ else:
     # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
     excel_handler.save_url_to_excel(output_file)
 
+class DataAnalyzer:
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.data = pd.read_excel(file_path)
+        self.columns_of_interest = [
+            'Consommation brute gaz (MW PCS 0°C) - GRTgaz',
+            'Consommation brute gaz (MW PCS 0°C) - Teréga',
+            'Consommation brute gaz totale (MW PCS 0°C)',
+            'Consommation brute électricité (MW) - RTE',
+            'Consommation brute totale (MW)'
+        ]
+        self.x = np.arange(len(self.data))
 
-def plot_histograms_from_excel():
-    # Lire les données à partir du fichier Excel
-    data = pd.read_excel('output.xlsx')
+    def plot_histograms(self):
+        max_values = self.data[self.columns_of_interest].max()
+        min_values = self.data[self.columns_of_interest].min()
+        mean_values = self.data[self.columns_of_interest].mean()
 
-    # Colonnes d'intérêt
-    columns_of_interest = [
-        'Consommation brute gaz (MW PCS 0°C) - GRTgaz',
-        'Consommation brute gaz (MW PCS 0°C) - Teréga',
-        'Consommation brute gaz totale (MW PCS 0°C)',
-        'Consommation brute électricité (MW) - RTE',
-        'Consommation brute totale (MW)'
-    ]
+        end_time = self.data['Date'].iloc[0]
+        start_time = self.data['Date'].iloc[-1]
 
-    # Calculer les statistiques
-    max_values = data[columns_of_interest].max()
-    min_values = data[columns_of_interest].min()
-    mean_values = data[columns_of_interest].mean()
+        columns_of_interest_abr = [
+            'GRTgaz',
+            'Teréga',
+            'Total Gaz',
+            'RTE',
+            'Total'
+        ]
 
-    # Extraire la plage de temps
-    start_time = data['Date'].iloc[0]
-    end_time = data['Date'].iloc[-1]
-    time_range = f"Plage de temps: {start_time} à {end_time}"
+        fig = make_subplots(rows=3, cols=1, subplot_titles=('Valeurs Maximales', 'Valeurs Minimales', 'Valeurs Moyennes'))
 
-    columns_of_interest_abr = [
-        'GRTgaz',
-        'Teréga',
-        'Total Gaz',
-        'RTE',
-        'Total'
-    ]
+        fig.add_trace(go.Bar(x=columns_of_interest_abr, y=max_values, marker_color='blue', name='Valeurs Maximales'), row=1, col=1)
+        fig.add_trace(go.Bar(x=columns_of_interest_abr, y=min_values, marker_color='red', name='Valeurs Minimales'), row=2, col=1)
+        fig.add_trace(go.Bar(x=columns_of_interest_abr, y=mean_values, marker_color='green', name='Valeurs Moyennes'), row=3, col=1)
 
-    
+        fig.update_layout(template="plotly_white", height=800, width=800, title_text=f"Consommation de Gaz et d'Électricité du {start_time} au {end_time}")
+        fig.update_yaxes(title_text="Consommation (MW)", range=[0, 40000])
 
-    # Créer les sous-graphiques
-    fig = make_subplots(rows=3, cols=1, subplot_titles=('Valeurs Maximales', 'Valeurs Minimales', 'Valeurs Moyennes'))
+        fig.show()
 
-    # Histogramme des valeurs maximales
-    fig.add_trace(go.Bar(x=columns_of_interest_abr, y=max_values, marker_color='blue', name='Valeurs Maximales'), row=1, col=1)
+    def plot_linear_interpolation(self):
+        fig = make_subplots(rows=1, cols=1, subplot_titles=('Interpolation Linéaire'))
+        for col in self.columns_of_interest:
+            y = self.data[col].values
+            linear_interp = np.interp(self.x, self.x, y)
+            fig.add_trace(go.Scatter(x=self.data['Date'], y=linear_interp, mode='lines', name=col))
+        fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Linéaire")
+        fig.update_yaxes(title_text="Consommation (MW)", range=[0, 40000])
 
-    # Histogramme des valeurs minimales
-    fig.add_trace(go.Bar(x=columns_of_interest_abr, y=min_values, marker_color='red', name='Valeurs Minimales'), row=2, col=1)
+        fig.show()
 
-    # Histogramme des valeurs moyennes
-    fig.add_trace(go.Bar(x=columns_of_interest_abr, y=mean_values, marker_color='green', name='Valeurs Moyennes'), row=3, col=1)
+    def plot_cubic_spline_interpolation(self):
+        fig = make_subplots(rows=1, cols=1, subplot_titles=('Interpolation Cubique'))
+        for col in self.columns_of_interest:
+            y = self.data[col].values
+            y = np.nan_to_num(y, nan=np.nanmean(y), posinf=np.nanmean(y), neginf=np.nanmean(y))
+            cubic_spline = CubicSpline(self.x, y)
+            x_new = np.linspace(0, len(self.data) - 1, 500)
+            y_new = cubic_spline(x_new)
+            fig.add_trace(go.Scatter(x=self.data['Date'].iloc[x_new.astype(int)], y=y_new, mode='lines', name=col))
+        fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Cubique")
+        fig.show()
 
-    # Mettre à jour la mise en page
-    fig.update_layout(template="plotly_white", height=800, width=800, title_text=f"Consommation de Gaz et d'Électricité du {end_time} au {start_time} ")
-    fig.update_yaxes(title_text="Consommation (MW)", range=[0, 40000])
+    def plot_spline_interpolation(self):
+        fig = make_subplots(rows=1, cols=1, subplot_titles=('Interpolation Spline'))
+        for col in self.columns_of_interest:
+            y = self.data[col].values
+            spline_interp = spi.UnivariateSpline(self.x, y)
+            x_new = np.linspace(0, len(self.data) - 1, 500)
+            y_new = spline_interp(x_new)
+            fig.add_trace(go.Scatter(x=self.data['Date'].iloc[x_new.astype(int)], y=y_new, mode='lines', name=col))
+        fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Spline")
+        fig.show()
 
-    # Afficher le graphique
-    fig.show()
 
-# Appeler la fonction pour tracer les histogrammes
-plot_histograms_from_excel()
+# Créer une instance de DataAnalyzer et appeler les fonctions pour tracer les graphiques
+data_analyzer = DataAnalyzer('output.xlsx')
+#data_analyzer.plot_histograms()
+data_analyzer.plot_linear_interpolation()
+#data_analyzer.plot_cubic_spline_interpolation()
+#data_analyzer.plot_spline_interpolation()
 
