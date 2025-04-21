@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow_1</class>
+ <widget class="QMainWindow" name="MainWindow_1">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>10</y>
+      <width>351</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-family:'Asap,Helvetica Neue,Helvetica,sans-serif'; font-size:xx-large; color:#005500; text-transform:uppercase;&quot;&gt;Le réseau au coeur &lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-family:'Asap,Helvetica Neue,Helvetica,sans-serif'; font-size:xx-large; color:#005500; text-transform:uppercase;&quot;&gt;des données d'énergie&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_5">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>150</y>
+      <width>61</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Exit</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>201</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-family:'Asap,Helvetica Neue,Helvetica,sans-serif'; font-size:14pt; color:#000000;&quot;&gt;ODRE:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-family:'Asap,Helvetica Neue,Helvetica,sans-serif'; font-size:10pt; font-weight:400; color:#000000;&quot;&gt;OpenData Reseaux-Energies&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>0</y>
+      <width>161</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&lt;span style=&quot; font-family:'Asap,Helvetica Neue,Helvetica,sans-serif'; font-size:14pt; color:#000000;&quot;&gt;IUT De Roanne:&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;right&quot;&gt;&lt;span style=&quot; font-family:'Asap,Helvetica Neue,Helvetica,sans-serif'; font-size:10pt; font-weight:400; color:#000000;&quot;&gt;By SYFA05&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>150</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>.xlsx file</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>100</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Charger les données:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QDateEdit" name="dateEdit">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>150</y>
+      <width>110</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="displayFormat">
+     <string>yyyy/mm/dd</string>
+    </property>
+   </widget>
+   <widget class="QDateEdit" name="dateEdit_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>150</y>
+      <width>110</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="displayFormat">
+     <string>yyyy/mm/dd</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>150</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Du&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>150</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Au&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>150</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>RUN</string>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="graphicsView">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>190</y>
+      <width>781</width>
+      <height>351</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox">
+    <property name="geometry">
+     <rect>
+      <x>680</x>
+      <y>190</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="currentText">
+     <string>---Interpolation---</string>
+    </property>
+    <item>
+     <property name="text">
+      <string>---Interpolation---</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Lineaire</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Afine</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Cubique</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="pushButton_4">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>150</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>View mean values</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
