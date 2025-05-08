@@ -1,12 +1,12 @@
 import pandas as pd
 import tkinter as tk
 import requests
-import matplotlib.pyplot as plts
+import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import numpy as np
 import scipy.interpolate as spi
 from plotly.subplots import make_subplots
-import json
+# Removed unused import
 from datetime import datetime
 from scipy.interpolate import CubicSpline
 from tkinter import filedialog
