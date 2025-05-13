@@ -71,8 +71,8 @@ if imported_data is not None:
 else:
     print("Aucune donnée importée")
     # Définir les dates de début et de fin
-    start_date = "2022-12-01"
-    end_date = "2023-01-31"
+    start_date = "2024-10-10"
+    end_date = "2025-05-12"
 
     # Créer une instance de ExcelDataHandler
     excel_handler = ExcelDataHandler(start_date, end_date)
@@ -131,7 +131,26 @@ class DataAnalyzer:
             linear_interp = np.interp(self.x, self.x, y)
             fig.add_trace(go.Scatter(x=self.data['Date - Heure'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z")), y=linear_interp, mode='lines', name=col))
         fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Linéaire")
+    
+    def plot_polynomial_interpolation(self):
+        fig = make_subplots(rows=1, cols=1, subplot_titles=('Interpolation Polynomiale'))
+        for col in self.columns_of_interest:
+            y = self.data[col].values
+            y = np.nan_to_num(y, nan=np.nanmean(y), posinf=np.nanmean(y), neginf=np.nanmean(y))
+            
+            for degree in [1, 2, 3]:
+                coefficients = np.polyfit(self.x, y, degree)
+                polynomial = np.poly1d(coefficients)
+                y_new = polynomial(self.x)
+                fig.add_trace(go.Scatter(
+                    x=self.data['Date - Heure'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z")),
+                    y=y_new,
+                    mode='lines',
+                    name=f"{col} (Degré {degree})"
+                ))
         
+        fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Polynomiale")
+        fig.show()
 
         fig.show()
 
@@ -166,4 +185,5 @@ data_analyzer = DataAnalyzer('output.xlsx')
 data_analyzer.plot_linear_interpolation()
 data_analyzer.plot_cubic_spline_interpolation()
 data_analyzer.plot_spline_interpolation()
+data_analyzer.plot_polynomial_interpolation()
 
