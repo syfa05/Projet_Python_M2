@@ -10,6 +10,7 @@ from plotly.subplots import make_subplots
 from datetime import datetime
 from scipy.interpolate import CubicSpline
 from tkinter import filedialog
+import time
 
 class ExcelDataHandler:
     def __init__(self, start_date, end_date):
@@ -62,8 +63,8 @@ class FileHandler:
         data.to_excel(output_file, index=False)
         print(f"Les données ont été enregistrées dans '{output_file}'")
         
-        return data
-
+        return
+"""
 # Importer les données à partir d'un fichier Excel
 imported_data = FileHandler.import_and_save_excel_file()
 if imported_data is not None:
@@ -71,7 +72,7 @@ if imported_data is not None:
 else:
     print("Aucune donnée importée")
     # Définir les dates de début et de fin
-    start_date = "2024-10-10"
+    start_date = "2023-10-10"
     end_date = "2025-05-12"
 
     # Créer une instance de ExcelDataHandler
@@ -82,7 +83,7 @@ else:
 
     # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
     excel_handler.save_url_to_excel(output_file)
-
+"""
 class DataAnalyzer:
     def __init__(self, file_path):
         self.file_path = file_path
@@ -133,25 +134,24 @@ class DataAnalyzer:
         fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Linéaire")
     
     def plot_polynomial_interpolation(self):
-        fig = make_subplots(rows=1, cols=1, subplot_titles=('Interpolation Polynomiale'))
+        fig = make_subplots(rows=1, cols=1, subplot_titles=('Interpolation Polynomiale (Degré 5)'))
         for col in self.columns_of_interest:
             y = self.data[col].values
             y = np.nan_to_num(y, nan=np.nanmean(y), posinf=np.nanmean(y), neginf=np.nanmean(y))
             
-            for degree in [1, 2, 3]:
-                coefficients = np.polyfit(self.x, y, degree)
-                polynomial = np.poly1d(coefficients)
-                y_new = polynomial(self.x)
-                fig.add_trace(go.Scatter(
-                    x=self.data['Date - Heure'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z")),
-                    y=y_new,
-                    mode='lines',
-                    name=f"{col} (Degré {degree})"
-                ))
+            # Interpolation polynomiale de degré 5
+            degree = 12
+            coefficients = np.polyfit(self.x, y, degree)
+            polynomial = np.poly1d(coefficients)
+            y_new = polynomial(self.x)
+            fig.add_trace(go.Scatter(
+                x=self.data['Date - Heure'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z")),
+                y=y_new,
+                mode='lines',
+                name=f"{col} (Degré {degree})"
+            ))
         
-        fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Polynomiale")
-        fig.show()
-
+        fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Polynomiale (Degré 5)")
         fig.show()
 
     def plot_cubic_spline_interpolation(self):
@@ -179,11 +179,48 @@ class DataAnalyzer:
         fig.show()
 
 
+class CodeTimer:
+    def __init__(self):
+        self.start_time = None
+        self.end_time = None
+
+    def start(self):
+        self.start_time = time.time()
+
+    def stop(self):
+        self.end_time = time.time()
+
+    def elapsed_time(self):
+        if self.start_time is not None and self.end_time is not None:
+            return self.end_time - self.start_time
+        else:
+            return None
+"""
+# Utilisation de CodeTimer pour mesurer le temps d'exécution
+timer = CodeTimer()
+timer.start()
+
+# Placez ici le code dont vous voulez mesurer le temps d'exécution
+# Exemple : data_analyzer.plot_polynomial_interpolation()
 # Créer une instance de DataAnalyzer et appeler les fonctions pour tracer les graphiques
 data_analyzer = DataAnalyzer('output.xlsx')
 #data_analyzer.plot_histograms()
-data_analyzer.plot_linear_interpolation()
+#data_analyzer.plot_linear_interpolation()
 data_analyzer.plot_cubic_spline_interpolation()
-data_analyzer.plot_spline_interpolation()
+#data_analyzer.plot_spline_interpolation()
 data_analyzer.plot_polynomial_interpolation()
 
+
+timer.stop()
+print(f"Temps d'exécution : {timer.elapsed_time():.2f} secondes")
+
+
+# Créer une instance de DataAnalyzer et appeler les fonctions pour tracer les graphiques
+data_analyzer = DataAnalyzer('output.xlsx')
+#data_analyzer.plot_histograms()
+#data_analyzer.plot_linear_interpolation()
+#data_analyzer.plot_cubic_spline_interpolation()
+#data_analyzer.plot_spline_interpolation()
+data_analyzer.plot_polynomial_interpolation()
+
+"""
