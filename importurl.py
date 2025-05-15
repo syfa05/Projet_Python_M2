@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Exitpage.ui'
+# Form implementation generated from reading ui file 'importurl.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -11,57 +11,57 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.resize(466, 279)
-        self.label_2 = QtWidgets.QLabel(Dialog)
-        self.label_2.setGeometry(QtCore.QRect(80, 20, 341, 91))
-        font = QtGui.QFont()
-        font.setPointSize(9)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_2.setFont(font)
-        self.label_2.setObjectName("label_2")
-        self.pushButton_21 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_21.setGeometry(QtCore.QRect(280, 230, 75, 23))
-        self.pushButton_21.setObjectName("pushButton_21")
-        self.pushButton_20 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_20.setGeometry(QtCore.QRect(370, 230, 75, 23))
-        self.pushButton_20.setObjectName("pushButton_20")
-        self.dateEdit = QtWidgets.QDateEdit(Dialog)
-        self.dateEdit.setGeometry(QtCore.QRect(150, 140, 111, 21))
+class Ui_Form(object):
+    def setupUi(self, Form):
+        Form.setObjectName("Form")
+        Form.resize(437, 324)
+        self.dateEdit = QtWidgets.QDateEdit(Form)
+        self.dateEdit.setGeometry(QtCore.QRect(130, 150, 111, 21))
         self.dateEdit.setObjectName("dateEdit")
-        self.dateEdit_2 = QtWidgets.QDateEdit(Dialog)
-        self.dateEdit_2.setGeometry(QtCore.QRect(150, 180, 110, 22))
-        self.dateEdit_2.setObjectName("dateEdit_2")
-        self.label_3 = QtWidgets.QLabel(Dialog)
-        self.label_3.setGeometry(QtCore.QRect(20, 140, 121, 21))
+        self.pushButton_20 = QtWidgets.QPushButton(Form)
+        self.pushButton_20.setGeometry(QtCore.QRect(260, 250, 75, 23))
+        self.pushButton_20.setObjectName("pushButton_20")
+        self.label_3 = QtWidgets.QLabel(Form)
+        self.label_3.setGeometry(QtCore.QRect(0, 150, 121, 21))
         font = QtGui.QFont()
         font.setPointSize(9)
         font.setBold(True)
         font.setWeight(75)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
-        self.label_4 = QtWidgets.QLabel(Dialog)
-        self.label_4.setGeometry(QtCore.QRect(20, 180, 121, 21))
+        self.label_4 = QtWidgets.QLabel(Form)
+        self.label_4.setGeometry(QtCore.QRect(0, 190, 121, 21))
         font = QtGui.QFont()
         font.setPointSize(9)
         font.setBold(True)
         font.setWeight(75)
         self.label_4.setFont(font)
         self.label_4.setObjectName("label_4")
+        self.dateEdit_2 = QtWidgets.QDateEdit(Form)
+        self.dateEdit_2.setGeometry(QtCore.QRect(130, 190, 110, 22))
+        self.dateEdit_2.setObjectName("dateEdit_2")
+        self.label_2 = QtWidgets.QLabel(Form)
+        self.label_2.setGeometry(QtCore.QRect(40, 20, 341, 91))
+        font = QtGui.QFont()
+        font.setPointSize(9)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_2.setFont(font)
+        self.label_2.setObjectName("label_2")
+        self.pushButton_21 = QtWidgets.QPushButton(Form)
+        self.pushButton_21.setGeometry(QtCore.QRect(340, 250, 75, 23))
+        self.pushButton_21.setObjectName("pushButton_21")
 
-        self.retranslateUi(Dialog)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        self.retranslateUi(Form)
+        QtCore.QMetaObject.connectSlotsByName(Form)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
-        self.label_2.setText(_translate("Dialog", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:400; color:#000000;\">Entrer la plage de temps sur laquelle </span></p><p align=\"center\"><span style=\" font-size:14pt; font-weight:400; color:#000000;\">vous souhaitez visualiser les données</span></p></body></html>"))
-        self.pushButton_21.setText(_translate("Dialog", "Importer"))
-        self.pushButton_20.setText(_translate("Dialog", "Annuler"))
-        self.dateEdit.setDisplayFormat(_translate("Dialog", "yyyy-MM-dd"))
-        self.dateEdit_2.setDisplayFormat(_translate("Dialog", "yyyy-MM-dd"))
-        self.label_3.setText(_translate("Dialog", "<html><head/><body><p align=\"center\">Date de debut</p></body></html>"))
-        self.label_4.setText(_translate("Dialog", "<html><head/><body><p align=\"center\">Date de debut</p></body></html>"))
+        Form.setWindowTitle(_translate("Form", "Form"))
+        self.dateEdit.setDisplayFormat(_translate("Form", "yyyy-MM-dd"))
+        self.pushButton_20.setText(_translate("Form", "Import"))
+        self.label_3.setText(_translate("Form", "<html><head/><body><p align=\"center\">Date de debut</p></body></html>"))
+        self.label_4.setText(_translate("Form", "<html><head/><body><p align=\"center\">Date de fin</p></body></html>"))
+        self.dateEdit_2.setDisplayFormat(_translate("Form", "yyyy-MM-dd"))
+        self.label_2.setText(_translate("Form", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:400; color:#000000;\">Entrer la plage de temps sur laquelle </span></p><p align=\"center\"><span style=\" font-size:14pt; font-weight:400; color:#000000;\">vous souhaitez visualiser les données</span></p></body></html>"))
+        self.pushButton_21.setText(_translate("Form", "Cancel"))

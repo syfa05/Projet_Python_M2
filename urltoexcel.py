@@ -25,16 +25,22 @@ class ExcelDataHandler:
         return f"{base_url}&qv1={query}&timezone=Europe%2FParis&use_labels=true&delimiter=%3B"
 
     def save_url_to_excel(self, output_file):
-        # Lire les données à partir de l'URL
-        response = requests.get(self.generate_url())
-        with open('output.xlsx', 'wb') as f:
-            f.write(response.content)
-        data = pd.read_excel('output.xlsx')
+        try:
+            # Lire les données à partir de l'URL
+            response = requests.get(self.generate_url())
+            with open(output_file, 'wb') as f:
+                f.write(response.content)
+            data = pd.read_excel(output_file)
 
-        # Enregistrer les données dans un fichier Excel
-        data.to_excel(output_file, index=False)
+            # Enregistrer les données dans un fichier Excel
+            data.to_excel(output_file, index=False)
+            
+            print(f"Les données ont été enregistrées dans '{output_file}'")
+        except PermissionError:
+            print(f"Erreur : Impossible d'écrire dans le fichier '{output_file}'. Assurez-vous qu'il n'est pas ouvert ou utilisé par un autre programme.")
+        except Exception as e:
+            print(f"Une erreur s'est produite : {e}")
         
-        print(f"Les données ont été enregistrées dans '{output_file}'")
 
 
 
@@ -63,7 +69,7 @@ class FileHandler:
         data.to_excel(output_file, index=False)
         print(f"Les données ont été enregistrées dans '{output_file}'")
         
-        return
+        return data
 """
 # Importer les données à partir d'un fichier Excel
 imported_data = FileHandler.import_and_save_excel_file()
@@ -72,8 +78,8 @@ if imported_data is not None:
 else:
     print("Aucune donnée importée")
     # Définir les dates de début et de fin
-    start_date = "2023-10-10"
-    end_date = "2025-05-12"
+    start_date = "2023-01-01"
+    end_date = "2023-03-01"
 
     # Créer une instance de ExcelDataHandler
     excel_handler = ExcelDataHandler(start_date, end_date)
@@ -83,6 +89,7 @@ else:
 
     # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
     excel_handler.save_url_to_excel(output_file)
+
 """
 class DataAnalyzer:
     def __init__(self, file_path):
@@ -97,7 +104,7 @@ class DataAnalyzer:
         ]
         self.x = np.arange(len(self.data))
 
-    def plot_histograms(self):
+    def plot_histograms(self,Valeur_seuille):
         max_values = self.data[self.columns_of_interest].max()
         min_values = self.data[self.columns_of_interest].min()
         mean_values = self.data[self.columns_of_interest].mean()
@@ -113,11 +120,11 @@ class DataAnalyzer:
             'Total'
         ]
 
-        fig = make_subplots(rows=3, cols=1, subplot_titles=('Valeurs Maximales', 'Valeurs Minimales', 'Valeurs Moyennes'))
+        fig = make_subplots(rows=1, cols=1, subplot_titles=('Valeurs Maximales', 'Valeurs Minimales', 'Valeurs Moyennes'))
 
-        fig.add_trace(go.Bar(x=columns_of_interest_abr, y=max_values, marker_color='blue', name='Valeurs Maximales'), row=1, col=1)
-        fig.add_trace(go.Bar(x=columns_of_interest_abr, y=min_values, marker_color='red', name='Valeurs Minimales'), row=2, col=1)
-        fig.add_trace(go.Bar(x=columns_of_interest_abr, y=mean_values, marker_color='green', name='Valeurs Moyennes'), row=3, col=1)
+        #fig.add_trace(go.Bar(x=columns_of_interest_abr, y=max_values, marker_color='blue', name='Valeurs Maximales'), row=1, col=1)
+        #fig.add_trace(go.Bar(x=columns_of_interest_abr, y=min_values, marker_color='red', name='Valeurs Minimales'), row=2, col=1)
+        fig.add_trace(go.Bar(x=columns_of_interest_abr, y=mean_values, marker_color='green', name='Valeurs Moyennes'), row=1, col=1)
 
         fig.update_layout(template="plotly_white", height=800, width=800, title_text=f"Consommation de Gaz et d'Électricité du {start_time} au {end_time}")
         fig.update_yaxes(title_text="Consommation (MW)", range=[0, 40000])
@@ -195,7 +202,16 @@ class CodeTimer:
             return self.end_time - self.start_time
         else:
             return None
+
+start_date = "2023-01-01"
+end_date = "2023-03-01"
+# Convertir une variable de type date en une chaîne de caractères
+date_variable = datetime.strptime(start_date, "%Y-%m-%d")
+date_string = date_variable.strftime("%d/%m/%Y")
+print("Date de début :", start_date)
+print("Date de fin :", end_date)
 """
+
 # Utilisation de CodeTimer pour mesurer le temps d'exécution
 timer = CodeTimer()
 timer.start()
@@ -222,5 +238,6 @@ data_analyzer = DataAnalyzer('output.xlsx')
 #data_analyzer.plot_cubic_spline_interpolation()
 #data_analyzer.plot_spline_interpolation()
 data_analyzer.plot_polynomial_interpolation()
+
 
 """
