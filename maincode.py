@@ -1,7 +1,8 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QDialog, QMessageBox, QFormLayout
+from PyQt5 import QtWidgets 
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWidgets import QMainWindow, QApplication, QDialog, QMessageBox, QFormLayout  
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpinBox, QLCDNumber
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot , QTimer
 import sys
 import time
 from urltoexcel import FileHandler,ExcelDataHandler,DataAnalyzer
@@ -20,17 +21,10 @@ class FormWindow(QDialog):
         self.ui.pushButton_21.clicked.connect(self.close)
         
     def urlimport(self):
-        time.sleep(8)
-        self.date_debut = self.ui.dateEdit.date().toString("yyyy-MM-dd")
-        self.date_fin = self.ui.dateEdit_2.date().toString("yyyy-MM-dd")
-        # Convertir les dates au format "yyyy-MM-dd"
-        # Convertir les variables de type QDate en chaînes de caractères au format "yyyy-MM-dd"
-        debut_string = f"{self.date_debut}"
-        fin_string = f"{self.date_fin}"
-        time.sleep(1)
-        print(debut_string, fin_string)
+        
+      
         # Créer une instance de la classe ExcelDataHandler
-        excel_handler = ExcelDataHandler(debut_string, fin_string)
+        excel_handler = ExcelDataHandler(self.ui.dateEdit, self.ui.dateEdit_2)
         # Attente de 5 secondes
         time.sleep(5)
         # Nom du fichier de sortie  
@@ -38,9 +32,6 @@ class FormWindow(QDialog):
         # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
         excel_handler.save_url_to_excel(output_file)
         print("Données importées avec succès")
-        # Attente de 10 secondes
-        #time.sleep(15)
-        # Fermer la fenêtre de dialogue après l'importation réussie
         QMessageBox.information(self, "Success", "Données importées avec succès")
         self.close()
 
@@ -60,22 +51,11 @@ class App(Ui_MainWindow, Ui_Form):
         self.commandLinkButton.clicked.connect(self.goto_tab3)
         self.pushButton_5.clicked.connect(self.exceldata)
         self.pushButton_13.clicked.connect(self.open_form_window)
-        
+        self.pushButton_6.clicked.connect(self.indicateurstatistique)
+        self.progressBar.setValue(0)
        
 # Creation de la class App qui herite de la classe Ui_MainWindow
-    
-    def importdata_online(self):
-        exit_dialog = QtWidgets.QDialog()
-        ui = Ui_Form()
-        ui.setupUi(exit_dialog)
-        exit_dialog.exec_()
-        #ui.pushButton_20.clicked.connect(exit(Ui_Dialog))  
-        #date_debut = ui.dateEdit.date().toString("yyyy-MM-dd")
-        #date_fin = ui.dateEdit_2.date().toString("yyyy-MM-dd")
-        #print(date_debut,date_fin)
-        #ui.pushButton_21.clicked.connect(ExcelDataHandler(date_debut, date_fin))
-        ui.pushButton_21.clicked.connect(exit_dialog.close)  
-               
+                  
     def open_form_window(self):
         self.form = FormWindow(self)
         self.form.show()  # ou self.form.exec_() si tu veux bloquer la mainwindow pendant
@@ -88,7 +68,7 @@ class App(Ui_MainWindow, Ui_Form):
             
             print("Données importées avec succès")
             # Fermer la fenêtre de dialogue après l'importation réussie
-            QMessageBox.information(self, "Success", "Données importées avec succès")
+            
         else:
             print("Aucune donnée importée")  
                             
@@ -101,11 +81,40 @@ class App(Ui_MainWindow, Ui_Form):
     def goto_tab3(self):
         self.Main_Table.setCurrentIndex(2)
         
-    def  dataprocessing(self):
+    def update_progress(self):
+        self.progress_value += 1
+        self.progressBar.setValue(self.progress_value)
+
+        if self.progress_value >= 100:
+            self.timer.stop()
+            print("Fin du délai de 10 secondes")
+                
+    def indicateurstatistique(self):
         # Créer une instance de DataAnalyzer
         data_analyzer = DataAnalyzer('output.xlsx')
+        colonne_name = self.comboBox.currentText()
         # Appeler la méthode pour analyser les données
-        data_analyzer.analyze_data()
+        start_data = data_analyzer.get_column_statistics(colonne_name)
+       
+        # Afficher les résultats dans les LCDNumber
+        self.lcdNumber.display(start_data["maxi"])
+        self.lcdNumber_4.display(start_data["mini"])
+        self.lcdNumber_5.display(start_data["moyenne"])
+        seuil_conso = self.spinBox.value()
+        j_sup , j_inf = data_analyzer.count_days_by_seuil(seuil_conso,colonne_name)
+        self.lcdNumber_3.display(j_sup)
+        self.lcdNumber_8.display(j_inf)
+        
+        self.progressBar.setValue(0)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_progress)
+        self.progress_value = 0
+        self.timer.start(100)  # 100 ms = 0.1 
+        
+
+        
+    
+    
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
