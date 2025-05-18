@@ -97,8 +97,6 @@ class DataAnalyzer:
     def __init__(self, file_path):
         self.file_path = file_path
         self.data = pd.read_excel(file_path, engine='openpyxl')
-        # Nettoyer les noms de colonnes pour corriger les problèmes d'encodage
-        self.data.columns = [col.encode('latin1').decode('utf-8') if isinstance(col, str) else col for col in self.data.columns]
         self.columns_of_interest = [
             'Consommation brute gaz (MW PCS 0°C) - GRTgaz',
             'Consommation brute gaz (MW PCS 0°C) - Teréga',
