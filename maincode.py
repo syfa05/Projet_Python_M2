@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDialog, QMessageBox, QFormLayout  
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpinBox, QLCDNumber
-from PyQt5.QtCore import pyqtSlot , QTimer
+from PyQt5.QtCore import pyqtSlot , QTimer ,QUrl
 import sys
 import time
 from urltoexcel import FileHandler,ExcelDataHandler,DataAnalyzer
@@ -88,6 +88,36 @@ class App(Ui_MainWindow, Ui_Form):
         if self.progress_value >= 100:
             self.timer.stop()
             print("Fin du délai de 10 secondes")
+     
+    
+    def afficher_graphe(self, stats,colonne):
+        # Générer le fichier HTML avec le graphique
+        data_analyzer = DataAnalyzer('output.xlsx')
+        data = data_analyzer.get_column_statistics(colonne)
+        html_file = data_analyzer.plot_histograms(data, value_type='mean_Total')
+
+        if html_file is None:
+            return
+
+        # Nettoyer le layout du widget avant d’ajouter un nouveau graphique
+        layout = self.openGLWidget.layout()
+        if layout is not None:
+            for i in reversed(range(layout.count())):
+                widget_to_remove = layout.itemAt(i).widget()
+                if widget_to_remove:
+                    widget_to_remove.setParent(None)
+
+        else:
+            # Si aucun layout n'était défini
+            from PyQt5.QtWidgets import QVBoxLayout
+            self.openGLWidget.setLayout(QVBoxLayout())
+            layout = self.openGLWidget.layout()
+
+        # Affichage dans le widget
+        web_view = QWebEngineView()
+        web_view.load(QUrl.fromLocalFile(html_file))
+        layout.addWidget(web_view)
+ 
                 
     def indicateurstatistique(self):
         # Créer une instance de DataAnalyzer
@@ -110,6 +140,9 @@ class App(Ui_MainWindow, Ui_Form):
         self.timer.timeout.connect(self.update_progress)
         self.progress_value = 0
         self.timer.start(100)  # 100 ms = 0.1 
+        Histogram = self.afficher_graphe(start_data["mean_Total"],colonne_name)
+        # Afficher le graphique dans le widget OpenGL
+        
         
 
         
