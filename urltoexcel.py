@@ -106,15 +106,24 @@ class DataAnalyzer:
         if column_name not in self.columns_of_interest:
             print(f"Colonne '{column_name}' non valide. Choisissez parmi : {self.columns_of_interest}")
             return None
+
         if 'Date' not in self.data.columns:
             print("Colonne 'Date' manquante dans les données.")
             return None
-        # Convertir la colonne 'Date' en datetime si ce n'est pas déjà fait
+
+        # Convertir la colonne 'Date' (format JJ/MM/AAAA) en datetime
         self.data['Date'] = pd.to_datetime(self.data['Date'], format='%d/%m/%Y', errors='coerce')
-        # Grouper par jour et sommer la consommation pour chaque jour
-        daily_consumption = self.data.groupby(self.data['Date'])[column_name].sum()
-        nb_jours_sup = (daily_consumption > seuil).sum()
-        nb_jours_inf = (daily_consumption < seuil).sum()
+
+        # Retirer les lignes avec des dates non valides ou des NaN dans la colonne cible
+        clean_data = self.data.dropna(subset=['Date', column_name])
+
+        # Grouper par jour et calculer la moyenne de consommation par jour
+        daily_avg = clean_data.groupby(clean_data['Date'].dt.date)[column_name].mean()
+
+        # Compter les jours au-dessus et en-dessous du seuil
+        nb_jours_sup = (daily_avg > seuil).sum()
+        nb_jours_inf = (daily_avg < seuil).sum()
+
         return nb_jours_sup, nb_jours_inf
        
     def get_column_statistics(self, column_name):
@@ -219,7 +228,7 @@ class DataAnalyzer:
             fig.write_html(f.name)
             return f.name  # Chemin absolu vers le fichier HTML
 
-    def plot_polynomial_interpolation(self, column_name, degree=8):
+    def plot_polynomial_interpolation(self, column_name, degree=4):
         """
         Effectue une interpolation polynomiale pour la colonne spécifiée et affiche le résultat avec Plotly.
         """
@@ -257,58 +266,23 @@ class DataAnalyzer:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
             fig.write_html(f.name)
             return f.name  # Chemin absolu vers le fichier HTML
-
-    def plot_best_fit_interpolation(self, column_name):
+        
+    def plot_affine_interpolation(self, column_name):
         """
-        Tente plusieurs méthodes d'interpolation/régression et choisit celle qui minimise l'erreur quadratique moyenne (RMSE)
-        pour la colonne spécifiée. Affiche le meilleur ajustement pour la série.
+        Effectue une interpolation affine (linéaire) pour la colonne spécifiée
+        et affiche le résultat avec Plotly.
         """
         if column_name not in self.columns_of_interest:
             print(f"Colonne '{column_name}' non valide. Choisissez parmi : {self.columns_of_interest}")
             return None
 
-        fig = make_subplots(rows=1, cols=1, subplot_titles=(f'Meilleur Ajustement - {column_name}',))
+        fig = make_subplots(rows=1, cols=1, subplot_titles=(f'Interpolation Affine - {column_name}',))
         y = self.data[column_name].values
         y = np.nan_to_num(y, nan=np.nanmean(y), posinf=np.nanmean(y), neginf=np.nanmean(y))
 
-        # Préparer les méthodes à tester
-        methods = {}
-
-        # 1. Polynomiale (degré 4 à 7)
-        for deg in range(4, 7):
-            coeffs = np.polyfit(self.x, y, deg)
-            poly = np.poly1d(coeffs)
-            y_pred = poly(self.x)
-            rmse = np.sqrt(mean_squared_error(y, y_pred))
-            methods[f'Poly{deg}'] = (poly, rmse)
-
-        # 2. Spline cubique
-        try:
-            cubic_spline = CubicSpline(self.x, y)
-            y_pred = cubic_spline(self.x)
-            rmse = np.sqrt(mean_squared_error(y, y_pred))
-            methods['CubicSpline'] = (cubic_spline, rmse)
-        except Exception:
-            pass
-
-        # 3. Spline lissée (UnivariateSpline)
-        try:
-            spline = UnivariateSpline(self.x, y, s=len(self.x))  # s: paramètre de lissage
-            y_pred = spline(self.x)
-            rmse = np.sqrt(mean_squared_error(y, y_pred))
-            methods['SmoothSpline'] = (spline, rmse)
-        except Exception:
-            pass
-
-        # Choisir la méthode avec le plus petit RMSE
-        best_method = min(methods.items(), key=lambda item: item[1][1])
-
-        # Générer les points pour affichage
+        # Interpolation linéaire (affine)
         x_new = np.linspace(0, len(self.data) - 1, 500)
-        if best_method[0].startswith('Poly'):
-            y_new = best_method[1][0](x_new)
-        else:
-            y_new = best_method[1][0](x_new)
+        y_new = np.interp(x_new, self.x, y)
 
         # Gérer les dates pour l'axe x
         if 'Date - Heure' in self.data.columns:
@@ -318,7 +292,7 @@ class DataAnalyzer:
         else:
             x_dates = x_new
 
-        fig.add_trace(go.Scatter(x=x_dates, y=y_new, mode='lines', name=f"{column_name} ({best_method[0]})"))
+        fig.add_trace(go.Scatter(x=x_dates, y=y_new, mode='lines', name=column_name))
 
         # Déterminer les dates de début et de fin pour le titre
         if 'Date' in self.data.columns:
@@ -335,7 +309,7 @@ class DataAnalyzer:
             template="plotly_white",
             height=600,
             width=800,
-            title_text=f"Meilleur Ajustement du {start_time} au {end_time} - {column_name}"
+            title_text=f"Interpolation Affine du {start_time} au {end_time} - {column_name}"
         )
         fig.update_yaxes(title_text="Consommation (MW)")
         fig.update_layout(

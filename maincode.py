@@ -36,14 +36,14 @@ class FormWindow(QDialog):
         if excel_handler is not None:
             # Afficher un message de succès
             print("Données importées avec succès")
-            time.sleep(4)
+            time.sleep(2)
             QMessageBox.information(self, "Success", "Données importées avec succès")
         else:
             # Afficher un message d'erreur
             print("Erreur lors de l'importation des données")
             print(str_date_debut, str_date_fin)
             print(url_handler)
-            time.sleep(4)
+            time.sleep(2)
             QMessageBox.critical(self, "Error", "Erreur lors de l'importation des données")
         # Fermer la fenêtre de dialogue après l'importation réussie
         self.close()
@@ -97,13 +97,20 @@ class App(Ui_MainWindow, Ui_Form):
         self.Main_Table.setCurrentIndex(2)
         
     def update_progress(self):
-        self.progress_value += 1
+        self.progress_value += 2  # 100 / (5/ 0.1) = 2.5 per 100ms for 3 seconds
         self.progressBar.setValue(self.progress_value)
 
         if self.progress_value >= 100:
             self.timer.stop()
-            print("Fin du délai de 10 secondes")
+            print("Fin du délai de 5 secondes")
      
+    def update_progress2(self):
+        self.progress_value += 2  # 100 / (5 / 0.1) = 2.5 per 100ms for 3 seconds
+        self.progressBar_2.setValue(self.progress_value)
+
+        if self.progress_value >= 100:
+            self.timer.stop()
+            print("Fin du délai de 5 secondes")
     
     def afficher_graphe(self, stats,colonne):
         # Générer le fichier HTML avec le graphique
@@ -193,13 +200,15 @@ class App(Ui_MainWindow, Ui_Form):
         elif interpolation == "polynomial_interpolation":
             html_file2 = data_analyzer.plot_polynomial_interpolation(date_name)
             result2 = self.showplot(html_file2)
-        elif interpolation == "bets_optimation_interpolation": 
-            html_file3 =data_analyzer.plot_best_fit_interpolation(date_name)
+        elif interpolation == "affine_interpolation": 
+            html_file3 =data_analyzer.plot_affine_interpolation(date_name)
             result = self.showplot(html_file3)
             
-
-        
-    
+        self.progressBar_2.setValue(0)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_progress2)
+        self.progress_value = 0
+        self.timer.start(100)  # 100 ms = 0.1 
     
 
 if __name__ == '__main__':
@@ -211,25 +220,3 @@ if __name__ == '__main__':
     dialog.show()
     #Dialog.show()   
     sys.exit(app.exec_())
-    
-"""
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    main_window = MainApp()
-    main_window.show()
-    sys.exit(app.exec_())
-    
-   
-    
-class App(Ui_MainWindow, Ui_Dialog):
-def __init__(self, dialog):
-    Ui_MainWindow.__init__(self)
-    self.setupUi(dialog)
-    # Connection du signal .clicked() avec le slot .calculate()
-    
-    #self.pushButton.clicked.connect(self.calculate)
-    #self.pushButton_2.clicked.connect(self.reset)
-    self.pushButton.clicked.connect(self.show_exit_dialog)
-    #self.pushButton_3.clicked.connect(self.show_exit_dialog)
-    
-    """
