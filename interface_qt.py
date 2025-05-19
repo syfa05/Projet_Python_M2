@@ -394,9 +394,9 @@ class Ui_MainWindow(object):
         self.pushButton_11.setText(_translate("MainWindow", "Exit"))
         self.comboBox_3.setCurrentText(_translate("MainWindow", "---Interpolation---"))
         self.comboBox_3.setItemText(0, _translate("MainWindow", "---Interpolation---"))
-        self.comboBox_3.setItemText(1, _translate("MainWindow", "spline_interpolation"))
-        self.comboBox_3.setItemText(2, _translate("MainWindow", "cubic_spline_interpolation"))
-        self.comboBox_3.setItemText(3, _translate("MainWindow", "polynomial_interpolation"))
+        self.comboBox_3.setItemText(1, _translate("MainWindow", "cubic_spline_interpolation"))
+        self.comboBox_3.setItemText(2, _translate("MainWindow", "polynomial_interpolation"))
+        self.comboBox_3.setItemText(3, _translate("MainWindow", "bets_optimation_interpolation"))
         self.textEdit_3.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

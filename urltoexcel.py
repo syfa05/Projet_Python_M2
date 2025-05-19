@@ -10,48 +10,55 @@ from datetime import datetime
 from scipy.interpolate import CubicSpline
 from tkinter import filedialog
 import time
+from sklearn.metrics import mean_squared_error
+from scipy.interpolate import UnivariateSpline
 
 class ExcelDataHandler:
-    def __init__(self, start_date, end_date):
-        # Accepte start_date et end_date comme datetime, string, QDateEdit, ou QDate, puis les convertit en 'yyyy-mm-dd'
-        self.date_debut_str = self._convert_to_str(start_date)
-        self.date_fin_str = self._convert_to_str(end_date)
-        
-    def _convert_to_str(self, date_obj):
-        # Si QDateEdit (PyQt5/6), extraire QDate puis convertir
-        if hasattr(date_obj, "date"):
-            date_obj = date_obj.date()
-        # Si QDate, convertir en Python datetime
-        if hasattr(date_obj, "toPyDate"):
-            date_obj = date_obj.toPyDate()
-        # Si string, convertir en datetime
-        if isinstance(date_obj, str):
-            return pd.to_datetime(date_obj).strftime("%Y-%m-%d")
-        # Si datetime/date, formatter
-        return date_obj.strftime("%Y-%m-%d")
-        
+    def __init__(self, date_debut_str, date_fin_str):
+       self.date_debut_str = date_debut_str
+       self.date_fin_str = date_fin_str  
+   
+            
+
     def generate_url(self):
+        """
+        Génère l'URL d'accès au fichier CSV à partir des dates sélectionnées.
+        Assurez-vous que `self.date_debut_str` et `self.date_fin_str` sont au format 'yyyy-MM-dd'.
+        """
+        base_url = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/exports/csv"
         url = (
-            "https://odre.opendatasoft.com/explore/dataset/consommation-quotidienne-brute/download/"
-            "?format=csv&timezone=Europe/Paris"
-            f"&q=date_heure:[{self.date_debut_str}T00:00:00Z TO {self.date_fin_str}T23:59:59Z]"
-            "&sort=-date_heure"
+            f"{base_url}"
+            "?lang=fr"
+            f"&qv1=(date_heure%3A%5B{self.date_debut_str}T00%3A00%3A00Z%20TO%20{self.date_fin_str}T23%3A59%3A59Z%5D)"
+            "&timezone=Europe%2FParis"
+            "&use_labels=true"
+            "&delimiter=%3B"
         )
         return url
 
-    def save_url_to_excel(self, output_file):
+    def save_url_to_excel(self, output_file='output.xlsx'):
+        """
+        Télécharge le fichier CSV depuis l'URL générée, le convertit en Excel (.xlsx) et l'enregistre sous `output_file`.
+        """
         try:
-            response = requests.get(self.generate_url())
-            # Save as CSV first
+            url = self.generate_url()
+            response = requests.get(url)
+            response.raise_for_status()
+
+            # Sauvegarde temporaire du fichier CSV
             with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp_csv:
                 tmp_csv.write(response.content)
                 tmp_csv_path = tmp_csv.name
-            # Read CSV and save as Excel
-            data = pd.read_csv(tmp_csv_path, sep=';')
+
+            # Conversion CSV → Excel
+            data = pd.read_csv(tmp_csv_path, sep=';', engine='python')
             data.to_excel(output_file, index=False, engine='openpyxl')
-            print(f"Les données ont été enregistrées dans '{output_file}'")
+
+            print(f"✅ Les données ont été enregistrées dans '{output_file}'")
+
         except Exception as e:
-            print(f"Une erreur s'est produite : {e}")
+            print(f"❌ Une erreur s'est produite lors du téléchargement ou de la conversion : {e}")
+        return data
 
 class FileHandler:
     @staticmethod
@@ -76,23 +83,7 @@ class FileHandler:
         data.to_excel(output_file, index=False, engine='openpyxl')
         print(f"Les données ont été enregistrées dans '{output_file}'")
         return data
-"""
-# Importer les données à partir d'un fichier Excel
-imported_data = FileHandler.import_and_save_excel_file()
-if imported_data is not None:
-    print("Données importées avec succès")
-else:
-    print("Aucune donnée importée")
-    # Définir les dates de début et de fin
-    start_date = "2023-01-01"
-    end_date = "2023-03-01"
-    # Créer une instance de ExcelDataHandler
-    excel_handler = ExcelDataHandler(start_date, end_date)
-    # Nom du fichier de sortie
-    output_file = 'output.xlsx'
-    # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
-    excel_handler.save_url_to_excel(output_file)
-"""
+
 class DataAnalyzer:
     def __init__(self, file_path):
         self.file_path = file_path
@@ -177,97 +168,182 @@ class DataAnalyzer:
             fig.write_html(f.name)
             return f.name  # Chemin absolu vers le fichier HTML
 
-    def plot_polynomial_interpolation(self):
-        fig = make_subplots(rows=1, cols=1, subplot_titles=('Interpolation Polynomiale (Degré 5)'))
-        for col in self.columns_of_interest:
-            y = self.data[col].values
-            y = np.nan_to_num(y, nan=np.nanmean(y), posinf=np.nanmean(y), neginf=np.nanmean(y))
-            # Interpolation polynomiale de degré 5
-            degree = 12
-            coefficients = np.polyfit(self.x, y, degree)
-            polynomial = np.poly1d(coefficients)
-            y_new = polynomial(self.x)
-            fig.add_trace(go.Scatter(
-                x=self.data['Date - Heure'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z")),
-                y=y_new,
-                mode='lines',
-                name=f"{col} (Degré {degree})"
-            ))
-        fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Polynomiale (Degré 5)")
-        fig.show()
-
-    def plot_cubic_spline_interpolation(self):
-        fig = make_subplots(rows=1, cols=1, subplot_titles=('Interpolation Cubique'))
-        for col in self.columns_of_interest:
-            y = self.data[col].values
-            y = np.nan_to_num(y, nan=np.nanmean(y), posinf=np.nanmean(y), neginf=np.nanmean(y))
-            cubic_spline = CubicSpline(self.x, y)
-            x_new = np.linspace(0, len(self.data) - 1, 500)
-            y_new = cubic_spline(x_new)
-            fig.add_trace(go.Scatter(x=self.data['Date - Heure'].iloc[x_new.astype(int)].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z")), y=y_new, mode='lines', name=col))
-        fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Cubique")
-        fig.show()
-
-    def plot_spline_interpolation(self):
-        fig = make_subplots(rows=1, cols=1, subplot_titles=('Interpolation Spline'))
-        for col in self.columns_of_interest:
-            y = self.data[col].values
-            y = np.nan_to_num(y, nan=np.nanmean(y), posinf=np.nanmean(y), neginf=np.nanmean(y))
-            spline_interp = spi.UnivariateSpline(self.x, y)
-            x_new = np.linspace(0, len(self.data) - 1, 500)
-            y_new = spline_interp(x_new)
-            fig.add_trace(go.Scatter(x=self.data['Date - Heure'].iloc[x_new.astype(int)].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z")), y=y_new, mode='lines', name=col))
-        fig.update_layout(template="plotly_white", height=600, width=800, title_text="Interpolation Spline")
-        fig.show()
-
-class CodeTimer:
-    def __init__(self):
-        self.start_time = None
-        self.end_time = None
-
-    def start(self):
-        self.start_time = time.time()
-
-    def stop(self):
-        self.end_time = time.time()
-
-    def elapsed_time(self):
-        if self.start_time is not None and self.end_time is not None:
-            return self.end_time - self.start_time
-        else:
+    
+    def plot_cubic_spline_interpolation(self, column_name):
+        """
+        Effectue une interpolation cubique pour la colonne spécifiée et affiche le résultat avec Plotly.
+        """
+        if column_name not in self.columns_of_interest:
+            print(f"Colonne '{column_name}' non valide. Choisissez parmi : {self.columns_of_interest}")
             return None
-"""
-# Exemple d'utilisation
-start_date = "2023-01-01"
-end_date = "2023-03-01"
-# Convertir une variable de type date en une chaîne de caractères
-date_variable = datetime.strptime(start_date, "%Y-%m-%d")
-date_string = date_variable.strftime("%d/%m/%Y")
-print("Date de début :", start_date)
-print("Date de fin :", end_date)
 
-# Utilisation de CodeTimer pour mesurer le temps d'exécution
-timer = CodeTimer()
-timer.start()
+        # Déterminer les dates de début et de fin pour le titre
+        if 'Date' in self.data.columns:
+            start_time = self.data['Date'].iloc[-1]
+            end_time = self.data['Date'].iloc[0]
+        elif 'Date - Heure' in self.data.columns:
+            start_time = self.data['Date - Heure'].iloc[-1]
+            end_time = self.data['Date - Heure'].iloc[0]
+        else:
+            start_time = ""
+            end_time = ""
 
-# Placez ici le code dont vous voulez mesurer le temps d'exécution
-# Exemple : data_analyzer.plot_polynomial_interpolation()
-# Créer une instance de DataAnalyzer et appeler les fonctions pour tracer les graphiques
-data_analyzer = DataAnalyzer('output.xlsx')
-#data_analyzer.plot_histograms()
-#data_analyzer.plot_linear_interpolation()
-data_analyzer.plot_cubic_spline_interpolation()
-#data_analyzer.plot_spline_interpolation()
-data_analyzer.plot_polynomial_interpolation()
+        fig = make_subplots(rows=1, cols=1, subplot_titles=(f'Interpolation Cubique - {column_name}',))
+        y = self.data[column_name].values
+        y = np.nan_to_num(y, nan=np.nanmean(y), posinf=np.nanmean(y), neginf=np.nanmean(y))
+        cubic_spline = CubicSpline(self.x, y)
+        x_new = np.linspace(0, len(self.data) - 1, 500)
+        y_new = cubic_spline(x_new)
+        if 'Date - Heure' in self.data.columns:
+            x_dates = self.data['Date - Heure'].iloc[x_new.astype(int)].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z"))
+        elif 'Date' in self.data.columns:
+            x_dates = self.data['Date'].iloc[x_new.astype(int)]
+        else:
+            x_dates = x_new
+        fig.add_trace(go.Scatter(x=x_dates, y=y_new, mode='lines', name=column_name))
 
-timer.stop()
-print(f"Temps d'exécution : {timer.elapsed_time():.2f} secondes")
+        fig.update_layout(
+            template="plotly_white",
+            height=600,
+            width=800,
+            title_text=f"Consommation de Gaz et d'Électricité du {start_time} au {end_time} - {column_name}"
+        )
+        fig.update_yaxes(title_text="Consommation (MW)")
+        fig.update_layout(
+            autosize=False,
+            width=781,
+            height=311,
+            margin=dict(l=0, r=0, t=40, b=0)
+        )
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
+            fig.write_html(f.name)
+            return f.name  # Chemin absolu vers le fichier HTML
 
-# Créer une instance de DataAnalyzer et appeler les fonctions pour tracer les graphiques
-data_analyzer = DataAnalyzer('output.xlsx')
-#data_analyzer.plot_histograms()
-#data_analyzer.plot_linear_interpolation()
-#data_analyzer.plot_cubic_spline_interpolation()
-#data_analyzer.plot_spline_interpolation()
-data_analyzer.plot_polynomial_interpolation()
-"""
+    def plot_polynomial_interpolation(self, column_name, degree=8):
+        """
+        Effectue une interpolation polynomiale pour la colonne spécifiée et affiche le résultat avec Plotly.
+        """
+        if column_name not in self.columns_of_interest:
+            print(f"Colonne '{column_name}' non valide. Choisissez parmi : {self.columns_of_interest}")
+            return None
+
+        fig = make_subplots(rows=1, cols=1, subplot_titles=(f'Interpolation Polynomiale - {column_name}',))
+        y = self.data[column_name].values
+        y = np.nan_to_num(y, nan=np.nanmean(y), posinf=np.nanmean(y), neginf=np.nanmean(y))
+        coeffs = np.polyfit(self.x, y, degree)
+        poly = np.poly1d(coeffs)
+        x_new = np.linspace(0, len(self.data) - 1, 500)
+        y_new = poly(x_new)
+        if 'Date - Heure' in self.data.columns:
+            x_dates = self.data['Date - Heure'].iloc[x_new.astype(int)].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z"))
+        elif 'Date' in self.data.columns:
+            x_dates = self.data['Date'].iloc[x_new.astype(int)]
+        else:
+            x_dates = x_new
+        fig.add_trace(go.Scatter(x=x_dates, y=y_new, mode='lines', name=column_name))
+        fig.update_layout(
+            template="plotly_white",
+            height=600,
+            width=800,
+            title_text=f"Interpolation Polynomiale - {column_name}"
+        )
+        fig.update_yaxes(title_text="Consommation (MW)")
+        fig.update_layout(
+            autosize=False,
+            width=781,
+            height=311,
+            margin=dict(l=0, r=0, t=40, b=0)
+        )
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
+            fig.write_html(f.name)
+            return f.name  # Chemin absolu vers le fichier HTML
+
+    def plot_best_fit_interpolation(self, column_name):
+        """
+        Tente plusieurs méthodes d'interpolation/régression et choisit celle qui minimise l'erreur quadratique moyenne (RMSE)
+        pour la colonne spécifiée. Affiche le meilleur ajustement pour la série.
+        """
+        if column_name not in self.columns_of_interest:
+            print(f"Colonne '{column_name}' non valide. Choisissez parmi : {self.columns_of_interest}")
+            return None
+
+        fig = make_subplots(rows=1, cols=1, subplot_titles=(f'Meilleur Ajustement - {column_name}',))
+        y = self.data[column_name].values
+        y = np.nan_to_num(y, nan=np.nanmean(y), posinf=np.nanmean(y), neginf=np.nanmean(y))
+
+        # Préparer les méthodes à tester
+        methods = {}
+
+        # 1. Polynomiale (degré 4 à 7)
+        for deg in range(4, 7):
+            coeffs = np.polyfit(self.x, y, deg)
+            poly = np.poly1d(coeffs)
+            y_pred = poly(self.x)
+            rmse = np.sqrt(mean_squared_error(y, y_pred))
+            methods[f'Poly{deg}'] = (poly, rmse)
+
+        # 2. Spline cubique
+        try:
+            cubic_spline = CubicSpline(self.x, y)
+            y_pred = cubic_spline(self.x)
+            rmse = np.sqrt(mean_squared_error(y, y_pred))
+            methods['CubicSpline'] = (cubic_spline, rmse)
+        except Exception:
+            pass
+
+        # 3. Spline lissée (UnivariateSpline)
+        try:
+            spline = UnivariateSpline(self.x, y, s=len(self.x))  # s: paramètre de lissage
+            y_pred = spline(self.x)
+            rmse = np.sqrt(mean_squared_error(y, y_pred))
+            methods['SmoothSpline'] = (spline, rmse)
+        except Exception:
+            pass
+
+        # Choisir la méthode avec le plus petit RMSE
+        best_method = min(methods.items(), key=lambda item: item[1][1])
+
+        # Générer les points pour affichage
+        x_new = np.linspace(0, len(self.data) - 1, 500)
+        if best_method[0].startswith('Poly'):
+            y_new = best_method[1][0](x_new)
+        else:
+            y_new = best_method[1][0](x_new)
+
+        # Gérer les dates pour l'axe x
+        if 'Date - Heure' in self.data.columns:
+            x_dates = self.data['Date - Heure'].iloc[x_new.astype(int)].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z"))
+        elif 'Date' in self.data.columns:
+            x_dates = self.data['Date'].iloc[x_new.astype(int)]
+        else:
+            x_dates = x_new
+
+        fig.add_trace(go.Scatter(x=x_dates, y=y_new, mode='lines', name=f"{column_name} ({best_method[0]})"))
+
+        # Déterminer les dates de début et de fin pour le titre
+        if 'Date' in self.data.columns:
+            start_time = self.data['Date'].iloc[-1]
+            end_time = self.data['Date'].iloc[0]
+        elif 'Date - Heure' in self.data.columns:
+            start_time = self.data['Date - Heure'].iloc[-1]
+            end_time = self.data['Date - Heure'].iloc[0]
+        else:
+            start_time = ""
+            end_time = ""
+
+        fig.update_layout(
+            template="plotly_white",
+            height=600,
+            width=800,
+            title_text=f"Meilleur Ajustement du {start_time} au {end_time} - {column_name}"
+        )
+        fig.update_yaxes(title_text="Consommation (MW)")
+        fig.update_layout(
+            autosize=False,
+            width=781,
+            height=311,
+            margin=dict(l=0, r=0, t=40, b=0)
+        )
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
+            fig.write_html(f.name)
+            return f.name  # Chemin absolu vers le fichier HTML

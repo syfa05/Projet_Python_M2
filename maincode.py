@@ -22,17 +22,30 @@ class FormWindow(QDialog):
         
     def urlimport(self):
         
-      
+        date_debut = self.ui.dateEdit.date()
+        date_fin = self.ui.dateEdit_2.date()
+    # Convertir les dates en chaînes de caractères au format "yyyy-MM-dd"
+        str_date_debut = date_debut.toString("yyyy-MM-dd")
+        str_date_fin = date_fin.toString("yyyy-MM-dd")
+        
         # Créer une instance de la classe ExcelDataHandler
-        excel_handler = ExcelDataHandler(self.ui.dateEdit, self.ui.dateEdit_2)
-        # Attente de 5 secondes
-        time.sleep(5)
-        # Nom du fichier de sortie  
-        output_file = 'output.xlsx'
-        # Appeler la fonction pour sauvegarder les données de l'URL dans un fichier Excel
-        excel_handler.save_url_to_excel(output_file)
-        print("Données importées avec succès")
-        QMessageBox.information(self, "Success", "Données importées avec succès")
+        excel_handler = ExcelDataHandler(str_date_debut, str_date_fin).save_url_to_excel()
+        # Appeler la méthode pour importer les données à partir de l'URL
+        url_handler = ExcelDataHandler(str_date_debut, str_date_fin).generate_url()
+        # Appeler la méthode pour importer les données à partir de l'URL
+        if excel_handler is not None:
+            # Afficher un message de succès
+            print("Données importées avec succès")
+            time.sleep(4)
+            QMessageBox.information(self, "Success", "Données importées avec succès")
+        else:
+            # Afficher un message d'erreur
+            print("Erreur lors de l'importation des données")
+            print(str_date_debut, str_date_fin)
+            print(url_handler)
+            time.sleep(4)
+            QMessageBox.critical(self, "Error", "Erreur lors de l'importation des données")
+        # Fermer la fenêtre de dialogue après l'importation réussie
         self.close()
 
 
@@ -53,6 +66,8 @@ class App(Ui_MainWindow, Ui_Form):
         self.pushButton_13.clicked.connect(self.open_form_window)
         self.pushButton_6.clicked.connect(self.indicateurstatistique)
         self.progressBar.setValue(0)
+        self.progressBar_2.setValue(0)
+        self.pushButton_12.clicked.connect(self.fonctionInterpolation)
        
 # Creation de la class App qui herite de la classe Ui_MainWindow
                   
@@ -143,7 +158,45 @@ class App(Ui_MainWindow, Ui_Form):
         Histogram = self.afficher_graphe(start_data["mean_Total"],colonne_name)
         # Afficher le graphique dans le widget OpenGL
         
+    def showplot(self,html_file):
         
+        # Nettoyer le layout du widget avant d’ajouter un nouveau graphique
+        layout = self.openGLWidget_2.layout()
+        if layout is not None:
+            for i in reversed(range(layout.count())):
+                widget_to_remove = layout.itemAt(i).widget()
+                if widget_to_remove:
+                    widget_to_remove.setParent(None)
+
+        else:
+            # Si aucun layout n'était défini
+            from PyQt5.QtWidgets import QVBoxLayout
+            self.openGLWidget_2.setLayout(QVBoxLayout())
+            layout = self.openGLWidget_2.layout()
+
+        # Affichage dans le widget
+        web_view = QWebEngineView()
+        web_view.load(QUrl.fromLocalFile(html_file))
+        layout.addWidget(web_view)
+        
+       
+    def fonctionInterpolation(self):
+        # Créer une instance de DataAnalyzer
+        data_analyzer = DataAnalyzer('output.xlsx')
+        # Appeler la méthode pour analyser les données
+        date_name = self.comboBox_2.currentText()
+        interpolation = self.comboBox_3.currentText()
+        # Appeler la méthode pour analyser les données
+        if interpolation == "cubic_spline_interpolation":
+            html_file1 =data_analyzer.plot_cubic_spline_interpolation(date_name)
+            result1 = self.showplot(html_file1)
+        elif interpolation == "polynomial_interpolation":
+            html_file2 = data_analyzer.plot_polynomial_interpolation(date_name)
+            result2 = self.showplot(html_file2)
+        elif interpolation == "bets_optimation_interpolation": 
+            html_file3 =data_analyzer.plot_best_fit_interpolation(date_name)
+            result = self.showplot(html_file3)
+            
 
         
     
