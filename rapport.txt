@@ -1,0 +1,205 @@
+
+================================================================================
+                            RAPPORT D'ALTERNANCE ET DE PROJET
+                      TECLIS INSTRUMENTS ET CONCEPTION DE LA CARTE
+                              TRACKER STANDARD
+================================================================================
+
+Table des matières
+------------------
+I. Présentation de l’entreprise Teclis Instruments
+   1. Historique et positionnement
+   2. Organisation et chiffres clés
+   3. Gamme de produits et applications
+
+II. Projet de Conception de la Carte Tracker Standard
+   1. Contexte et objectifs du projet
+   2. Cahier des charges et description fonctionnelle
+   3. Détails de la conception de la carte
+       3.1. Circuit de commande et pilotage du moteur
+       3.2. Circuit d'acquisition et de lecture de la température
+       3.3. Circuit de pilotage de l'agitateur magnétique
+   4. Procédure de tests et validation
+   5. Points de contrôle, difficultés et actions correctives
+
+III. Conclusion et perspectives
+
+================================================================================
+I. PRÉSENTATION DE L’ENTREPRISE TECLIS INSTRUMENTS
+================================================================================
+
+1. Historique et positionnement
+-------------------------------
+Teclis Instruments est une société française spécialisée dans la science des interfaces.
+Depuis plus de 25 ans, Teclis conçoit et développe des instruments de mesure et leurs logiciels.
+Les produits sont conçus et fabriqués en France et commercialisés dans le monde entier.
+L’entreprise dispose d’un important savoir-faire et d’un réseau de distribution dans plus de 25 pays,
+avec environ 80 % du chiffre d’affaires réalisé à l’export.
+
+[FIGURE 1 : Historique de Teclis Instruments]
+
+2. Organisation et chiffres clés
+----------------------------------
+L’entreprise est structurée autour de plusieurs pôles :
+  • Un pôle Recherche & Développement (30 % des ressources) collaborant avec des centres universitaires et de recherche.
+  • Un pôle production et fabrication, assurant la conception et l’assemblage des instruments à Lyon.
+  • Un service commercial et marketing qui développe les relations avec plus de 400 clients dans le monde.
+
+Quelques chiffres importants :
+  - Plus de 400 instruments vendus mondialement.
+  - Présence dans 25 pays.
+  - Plus de 1200 publications scientifiques font référence aux instruments Teclis.
+  - Croissance annuelle en hausse, avec +12 % de croissance.
+
+[FIGURE 2 : Organigramme et chiffres clés]
+
+3. Gamme de produits et applications
+--------------------------------------
+Teclis Instruments propose principalement deux gammes d’instruments :
+  • Les tensiomètres à gouttes TRACKER™
+  • Les analyseurs de mousse FOAMSCAN™
+
+Les instruments de Teclis sont utilisés dans divers domaines :
+  • Recherche fondamentale et développement de nouveaux produits (cosmétiques, pharmaceutiques, lubrifiants, etc.)
+  • Contrôle qualité et optimisation des process industriels.
+  • Collaboration avec des centres de recherche pour l’innovation en science des interfaces.
+
+Chaque instrument est associé à un logiciel de traitement des données qui permet une analyse en temps réel.
+Les produits offrent des solutions complètes d’acquisition, de traitement et d’analyse d’images,
+garantissant des mesures précises et reproductibles.
+
+[FIGURE 3 : Présentation des produits TRACKER et FOAMSCAN]
+
+================================================================================
+II. PROJET DE CONCEPTION DE LA CARTE TRACKER STANDARD
+================================================================================
+
+1. Contexte et objectifs du projet
+------------------------------------
+Le projet consiste à concevoir une carte électronique dédiée au contrôle et au pilotage
+du coffret du Tracker Standard. Ce projet est né de la volonté de remplacer une carte moteur obsolète
+par une solution plus moderne et performante, tout en intégrant de nouvelles fonctionnalités
+permettant d’améliorer la précision des mesures et la commande des différents sous-systèmes.
+
+Objectifs principaux :
+  - Remplacer la carte moteur PIM2403 par la carte IPOS3604.
+  - Améliorer le circuit de mesure de la température en élargissant la plage de mesure de -30°C à 250°C.
+  - Optimiser le circuit de pilotage de l’agitateur magnétique en intégrant une carte SMC11.
+  - Assurer la gestion de l’obsolescence des composants et optimiser le choix de ceux-ci.
+  - Mettre en place des points de test et des indicateurs visuels pour faciliter la maintenance.
+
+2. Cahier des charges et description fonctionnelle
+----------------------------------------------------
+Le cahier des charges définit les exigences fonctionnelles et techniques de la carte Tracker Standard.
+La carte est conçue pour commander plusieurs sous-ensembles :
+  a) Le circuit de commande et de pilotage du moteur,
+  b) Le circuit d’acquisition et de lecture de la température,
+  c) Le circuit de pilotage de l’agitateur magnétique.
+
+Spécifications techniques clés :
+  - Dimensions physiques : environ 95 mm x 100 mm.
+  - Alimentation : entrée de 12V DC, avec régulation pour obtenir +5V et ±12V.
+  - Interface utilisateur assurée par un pupitre de commande et un logiciel (Windrop) via RS232.
+  - Intégration de plusieurs connectiques (port DC37, connecteurs pour commande manuelle et pour le SMC11).
+
+[FIGURE 4 : Schéma fonctionnel de la carte Tracker]
+
+3. Détails de la conception de la carte
+----------------------------------------
+
+3.1 Circuit de commande et pilotage du moteur
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Le moteur du Tracker est commandé par la carte IPOS3604 MX-CAN qui permet :
+  - Un contrôle en position, en vitesse et en courant.
+  - L’intégration de fin de courses (limit switches LSP et LSN) pour sécuriser les déplacements.
+  - Une communication RS232 pour le transfert de données en code hexadécimal.
+
+Le schéma intègre également un système de relais et des points de test pour vérifier les tensions
+et le bon fonctionnement du circuit.
+
+[FIGURE 5 : Diagramme de commande du moteur]
+
+3.2 Circuit d'acquisition et de lecture de la température
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Ce circuit utilise :
+  - Une sonde PT100 pour mesurer la température avec une précision de 0,1°C.
+  - Un amplificateur d’instrumentation INA188ID pour la conversion linéaire du signal.
+  - Un amplificateur opérationnel LT1013 pour amplifier et adapter le signal, élargissant la plage de mesure.
+
+L’ensemble permet de mesurer des températures allant de -30°C à 250°C et d’obtenir des lectures fiables
+pour l’analyse des propriétés thermiques durant les mesures.
+
+[FIGURE 6 : Schéma du circuit de mesure de la température]
+
+3.3 Circuit de pilotage de l’agitateur magnétique
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Le circuit d’agitation comprend :
+  - Une carte SMC11 dédiée au pilotage du moteur de l’agitateur magnétique.
+  - Un convertisseur tension/fréquence permettant de générer une fréquence de 0 à 333 Hz pour contrôler
+    la vitesse du moteur.
+  - Une commande manuelle via potentiomètre et un mode numérique via le logiciel Windrop.
+  
+Pour des raisons de sécurité, le circuit inclut un système qui désactive l’alimentation du moteur lorsque
+l’agitateur n’est pas en service, évitant ainsi une surchauffe.
+
+[FIGURE 7 : Schéma du circuit de pilotage de l’agitateur]
+
+4. Procédure de tests et validation
+-------------------------------------
+Une fois la carte conçue et assemblée, une série de tests fonctionnels a été réalisée pour s’assurer
+de la conformité avec le cahier des charges :
+  - Vérification des points de test (TP1 à TP7) avec des multimètres et oscilloscopes.
+  - Test des LED indicatrices pour confirmer le bon fonctionnement des différents sous-ensembles.
+  - Tests de communication via RS232 et validation des commandes par le logiciel Windrop.
+  - Réalisation de tests en condition réelle pour vérifier la réponse dynamique du système (commande moteur,
+    acquisition de température, agitation magnétique).
+
+Les résultats obtenus ont permis de valider la robustesse et la fiabilité de la nouvelle carte,
+tout en identifiant quelques points d’amélioration sur la sécurité et la gestion des commandes.
+
+5. Points de contrôle, difficultés et actions correctives
+-----------------------------------------------------------
+Durant le développement du projet, plusieurs difficultés ont été rencontrées :
+  - Adaptation des anciens schémas à de nouveaux composants et mise à jour des références.
+  - Gestion des tensions et de la conversion d’alimentation pour garantir la stabilité du système.
+  - Coordination entre les différentes équipes (électronique, logiciel, assemblage) pour une intégration optimale.
+
+Plan d’action mis en place :
+  • Révision des circuits en intégrant des points de test supplémentaires et des indicateurs visuels.
+  • Optimisation du câblage et des connectiques pour faciliter l’assemblage et la maintenance.
+  • Suivi régulier et validation des tests fonctionnels avec retours d’expérience pour corriger
+    les anomalies constatées.
+
+================================================================================
+III. CONCLUSION ET PERSPECTIVES
+================================================================================
+
+Le projet de conception de la carte Tracker Standard a permis de moderniser et d’optimiser
+le système de commande des instruments TRACKER™ de Teclis Instruments. Grâce à l’intégration
+de nouvelles technologies (carte IPOS3604, amplificateurs de précision et carte SMC11), la nouvelle carte
+offre des performances accrues en termes de contrôle, de sécurité et de fiabilité.
+
+Perspectives d’évolution :
+  - Poursuite de l’optimisation des circuits pour intégrer de nouvelles fonctionnalités.
+  - Développement d’outils de diagnostic automatisés pour faciliter la maintenance.
+  - Collaboration renforcée avec le service R&D pour anticiper l’obsolescence des composants.
+
+En conclusion, ce projet constitue une étape importante dans la modernisation des instruments Teclis,
+permettant ainsi de répondre aux exigences du marché international tout en renforçant l’expertise
+technique de l’entreprise.
+
+================================================================================
+Annexes et Références
+================================================================================
+
+[FIGURE 8 : Schéma global de la carte Tracker Standard]
+[FIGURE 9 : Liste des composants et connectiques]
+[FIGURE 10 : Procédure de test et résultats mesurés]
+
+Références :
+  - Cahier des charges de la carte Tracker Standard (022025 Cahier des charges carte tracker.pdf)
+  - Rapport d'alternance de Teclis Instruments (Rapport d'alternance.pdf)
+
+================================================================================
+Fin du rapport
+================================================================================
