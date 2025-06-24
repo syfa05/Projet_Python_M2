@@ -11,7 +11,7 @@ print(file.readline() )
 file.close()
 """
 with open("test.txt", "r") as reader:
-    texte = reader.read()
+    texte = reader.readlines()
     reversed(texte)
     with open("test.txt", "w") as writer:
         for line in reversed(texte):
